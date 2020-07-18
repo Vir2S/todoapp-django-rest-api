@@ -8,7 +8,7 @@ router.register(r'users', UserViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('userlogin', AuthView.as_view()),
+    path('auth', AuthView.as_view()),
     path('todo/', TodoListView.as_view()),
     path('todo/<int:pk>/', TodoDetailView.as_view()),
 ]

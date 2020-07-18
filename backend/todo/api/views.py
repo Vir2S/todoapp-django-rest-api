@@ -1,11 +1,11 @@
 from rest_framework import generics, viewsets, permissions
 from todoapp.models import Todo
-from .serializers import UserSerializer, TodoSerializer, LoginRequestSerializer, CommonResponseSerializer
+from .serializers import UserSerializer, TodoSerializer, AuthRequestSerializer, LoginRequestSerializer, CommonResponseSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import action
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 
 class TodoListView(generics.ListCreateAPIView):
@@ -18,10 +18,6 @@ class TodoListView(generics.ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
-
-    # @action(detail=False, methods=['post'])
-    # def set_password(self, request, pk=None):
-    #     pass
 
 
 class TodoDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -43,21 +39,47 @@ class AuthView(APIView):
     permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
-        request_body=LoginRequestSerializer,
-        responses={200: CommonResponseSerializer}
+        request_body=AuthRequestSerializer,
     )
-    def post(self, request):
-        return Response(CommonResponseSerializer(
-            {
-                'status': 0,
-                'message': 'OK'
-            }
-        ).data)
+    def post(self, request, format=None):
+        print(request.data)
+        try:
+            user = User.objects.get(username=request.data['name'], email=request.data['email'])
+            token = Token.objects.get(user=user)
+        except Exception as e:
+            print(str(e))
+            user = User()
+            user.username = request.data['name']
+            user.email = request.data['email']
+            user.is_active = True
+            user.set_password = '12345678'
+            user.save()
+            token = Token.objects.create(user=user)
 
 
-class HelloView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+        return Response({
+            'token': token.key,
+            'agent': request.META['HTTP_USER_AGENT'],
+            'user': '{....}'
+        })
 
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
+
+    # @swagger_auto_schema(
+    #     request_body=LoginRequestSerializer,
+    #     responses={200: CommonResponseSerializer}
+    # )
+    # def post(self, request):
+    #     return Response(CommonResponseSerializer(
+    #         {
+    #             'status': 0,
+    #             'message': 'OK'
+    #         }
+    #     ).data)
+
+
+# class HelloView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+#
+#     def get(self, request):
+#         content = {'message': 'Hello, World!'}
+#         return Response(content)

@@ -38,4 +38,21 @@ class LoginRequestSerializer(serializers.Serializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        fields = [
+            'url',
+            'id',
+            'username',
+            'email',
+            # 'first_name',
+            # 'last_name',
+            'is_staff',
+        ]
+
+
+class AuthRequestSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+    email = serializers.CharField()
+    # first_name = serializers.CharField()
+    # last_name = serializers.CharField()
+    auth_token = serializers.CharField()
