@@ -56,7 +56,6 @@ class AuthView(APIView):
             user.save()
             token = Token.objects.create(user=user)
 
-
         return Response({
             'token': token.key,
             'agent': request.META['HTTP_USER_AGENT'],
