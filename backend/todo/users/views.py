@@ -1,6 +1,7 @@
 from users.serializers import UserSerializer
 from rest_framework import permissions
 from rest_framework.views import APIView
+from django.db.models import User
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 
@@ -29,9 +30,11 @@ def authenticate_user(request):
             try:
                 payload = jwt_payload_handler(user)
                 token = jwt.encode(payload, settings.SECRET_KEY)
-                user_details = {}
+
+                user_details = dict()
                 user_details['name'] = "%s %s" % (
                     user.first_name, user.last_name)
+
                 user_details['token'] = token
                 user_logged_in.send(sender=user.__class__,
                                     request=request, user=user)
